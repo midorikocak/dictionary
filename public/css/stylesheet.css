@@ -1,0 +1,88 @@
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+main,
+header,
+footer {
+    width: 75ch;
+}
+
+header{
+    margin: 2rem 0;
+}
+
+header h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-align: left;
+    margin: 1rem 0;
+    padding: 0;
+}
+
+section {
+    margin:  0;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button {
+    padding: 1rem;
+    border: 1px solid #b4b4b4;
+}
+
+button:hover {
+    background-color: #b4b4b4;
+    color: #fff;
+}
+
+.search button{
+    margin-left: 1rem;
+}
+
+input,
+textarea {
+    width: 50ch;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #b4b4b4;
+    font-size: 1rem;
+    flex: 1 0 auto;
+}
+
+button
+{
+    font-size: 1rem;
+}
+
+label{
+    font-size: 1rem;
+}
+
+.hide {
+    display: none;
+}

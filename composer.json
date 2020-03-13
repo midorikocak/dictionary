@@ -1,0 +1,57 @@
+{
+    "name": "midorikocak/dictionary",
+    "type": "library",
+    "description": "A dictionary software to teach you OOP.",
+    "keywords": [
+        "midorikocak",
+        "dictionary",
+        "oop",
+        "object",
+        "oriented"
+    ],
+    "homepage": "https://github.com/midorikocak/dictionary",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Midori Kocak",
+            "email": "mtkocak@gmail.com",
+            "homepage": "https://www.mtkocak.net",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "~7.4",
+        "ext-iconv": "*",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "phpunit/php-token-stream": "^4.0"
+    },
+    "require-dev": {
+        "opsway/psr12-strict-coding-standard": "^0.3.0",
+        "phpunit/phpunit": ">=8.5",
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "midorikocak\\dictionary\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "midorikocak\\dictionary\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --stderr",
+        "check-style": "phpcs src tests",
+        "fix-style": "phpcbf src tests"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
