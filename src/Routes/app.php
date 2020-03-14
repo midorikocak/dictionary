@@ -34,12 +34,3 @@ $router->post('search', function () use ($app) {
     require_once '../src/View/titles/index.php';
 });
 
-$router->get('/addTitle', function () {
-    require_once '../src/View/titles/add.php';
-});
-
-$router->post('/addTitle', function () use ($app) {
-    $id = $app->addTitle($_POST['title']);
-    $app->addEntry($id, $_POST['content']);
-    header("Location: /titles/$id");
-});

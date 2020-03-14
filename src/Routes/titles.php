@@ -37,3 +37,13 @@ $router->post('titles/{id}/addEntry', function ($id) use ($app) {
     $app->addEntry((int) $id, $_POST['content']);
     header("Location: /titles/$id");
 });
+
+$router->get('/titles/add', function () {
+    require_once '../src/View/titles/add.php';
+});
+
+$router->post('/titles', function () use ($app) {
+    $id = $app->addTitle($_POST['title']);
+    $app->addEntry($id, $_POST['content']);
+    header("Location: /titles/$id");
+});
