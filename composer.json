@@ -42,7 +42,7 @@
         }
     },
     "scripts": {
-        "test": "phpunit --stderr",
+        "test": "phpunit --stderr --coverage-text --coverage-clover=coverage.clover",
         "check-style": "phpcs src tests",
         "fix-style": "phpcbf src tests"
     },
