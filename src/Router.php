@@ -105,10 +105,13 @@ class Router
             return;
         }
 
-        foreach ($this->routes[$requestType] as $route => $fn) {
+        $routes = array_reverse($this->routes[$requestType]);
+
+        foreach ($routes as $route => $fn) {
             if ($this->compareUrl($url, $route)) {
                 $variables = $this->getWildcards($url, $route);
                 $fn(...array_values($variables));
+                return;
             }
         }
     }

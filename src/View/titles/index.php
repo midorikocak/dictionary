@@ -1,6 +1,5 @@
 
 <section class="results">
-    <h2>Titles</h2>
     <ol>
         <?php foreach($titles as $title):  ?>
             <li>

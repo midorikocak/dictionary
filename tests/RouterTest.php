@@ -66,4 +66,21 @@ class RouterTest extends TestCase
         $this->expectOutputString('35');
         $this->router->run('get', 'test/3/entry/5');
     }
+
+    public function testRunConflict(): void
+    {
+        $this->router->get('test/{id}', function ($id) {
+            echo $id;
+        });
+
+        $this->router->get('test/add', function () {
+            echo 'mahmut';
+        });
+
+        $this->expectOutputString('3');
+        $this->router->run('get', 'test/3');
+
+        $this->expectOutputString('3mahmut');
+        $this->router->run('get', 'test/add');
+    }
 }
