@@ -33,4 +33,3 @@ $router->post('search', function () use ($app) {
     $titles = $app->search($_POST['keyword']);
     require_once '../src/View/titles/index.php';
 });
-
