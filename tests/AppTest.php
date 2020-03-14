@@ -26,7 +26,8 @@ class AppTest extends TestCase
         $this->createTables();
 
         $this->app = new App($this->db);
-        $this->app->login('midori', 'midoripass');
+        $this->app->users->register('midori', 'email@example.com', 'midoripass');
+        $this->app->users->login('email@example.com', 'midoripass');
     }
 
     protected function tearDown(): void
@@ -67,9 +68,20 @@ CREATE TABLE examples (
 );
 ";
 
+        $sql4 = "
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    UNIQUE (email, username)
+);
+";
+
         $this->db->query($sql)->execute();
         $this->db->query($sql2)->execute();
         $this->db->query($sql3)->execute();
+        $this->db->query($sql4)->execute();
     }
 
     public function testDatabaseCreated(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace midorikocak\dictionary;
 
 use function array_map;
+use function htmlspecialchars;
 
 class Title implements ArrayableInterface
 {
@@ -62,7 +63,7 @@ class Title implements ArrayableInterface
     public function toArray(): array
     {
         $toReturn = [
-            'title' => $this->title,
+            'title' => htmlspecialchars($this->title),
         ];
 
         if ($this->id) {

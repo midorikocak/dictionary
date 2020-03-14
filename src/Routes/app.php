@@ -12,15 +12,56 @@ $router->get('login', function () {
 });
 
 $router->post('login', function () use ($app) {
-    if ($app->login($_POST['username'], $_POST['password'])) {
+    if ($app->users->login($_POST['email'], $_POST['password'])) {
         header("Location: /");
     } else {
         header("Location: /login");
     }
 });
 
+$router->get('settings', function () use ($app) {
+    $user = $app->users->getUserByUsername($_SESSION['user']);
+    require_once '../src/View/settings.php';
+});
+
+$router->post('/settings', function () use ($app) {
+    $user = $app->users->getUserByUsername($_SESSION['user']);
+    $newUsername = $_POST['username'];
+    $newEmail = $_POST['email'];
+    $password = $_POST['password'];
+    $passwordRepeat = $_POST['passwordRepeat'];
+
+    if (!empty($newUsername) && $user['username'] !== $newUsername) {
+        $app->users->changeUsername($newUsername);
+    }
+
+    if (!empty($newEmail) && $user['email'] !== $newEmail) {
+        $app->users->changeEmail($newEmail);
+    }
+
+    if (!empty($password) && $password === $passwordRepeat) {
+        $app->users->changePassword($password);
+    } else {
+        throw new Exception('Invalid password');
+    }
+
+    header("Location: /settings");
+});
+
+$router->get('register', function () {
+    require_once '../src/View/register.php';
+});
+
+$router->post('register', function () use ($app) {
+    if ($_POST['password'] !== $_POST['passwordRepeat']) {
+        throw new Exception('Passwords does not match');
+    }
+    $app->users->register($_POST['username'], $_POST['email'], $_POST['password']);
+    header("Location: /login");
+});
+
 $router->get('logout', function () use ($app) {
-    $app->logout();
+    $app->users->logout();
     header("Location: /");
 });
 

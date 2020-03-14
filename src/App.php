@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace midorikocak\dictionary;
 
-use Exception;
 use PDO;
 
 use function array_map;
 use function array_walk;
-use function session_destroy;
 use function session_start;
 use function strtolower;
 
@@ -17,43 +15,15 @@ class App
 {
     private PDO $db;
     public Titles $titles;
+    public Users $users;
 
     public function __construct(PDO $db)
     {
         $this->db = $db;
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->titles = new Titles($db);
+        $this->users = new Users($db);
         session_start();
-    }
-
-    public function login($username, $password): bool
-    {
-        if ($username === 'midori' && $password === 'midoripass') {
-            $_SESSION['user'] = $username;
-            return true;
-        }
-
-        return false;
-    }
-
-    public function logout(): void
-    {
-        session_destroy();
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function checkLogin(): void
-    {
-        if (!$this->getIsLogged()) {
-            throw new Exception('Unauthorized');
-        }
-    }
-
-    public function getIsLogged(): bool
-    {
-        return ($_SESSION['user'] ?? '') === 'midori';
     }
 
     public function getTitles(int $page = 0, int $limit = 10, int $offset = 0): array
@@ -72,7 +42,7 @@ class App
 
     public function addTitle(string $title): int
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Title $titleObject
          */
@@ -82,7 +52,7 @@ class App
 
     public function editTitle(int $titleId, string $title): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Title $titleObject
          */
@@ -93,7 +63,7 @@ class App
 
     public function deleteTitle(int $titleId): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Title $titleObject
          */
@@ -144,7 +114,7 @@ class App
 
     public function addEntry(int $titleId, $entryContent): int
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Entry $entryObject
          */
@@ -156,7 +126,7 @@ class App
 
     public function editEntry(int $entryId, string $entryContent): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Entry $entryObject
          */
@@ -167,7 +137,7 @@ class App
 
     public function deleteEntry(int $entryId): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         $entryObject = $this->titles->entries->read($entryId);
         $this->titles->entries->remove($entryObject);
     }
@@ -188,7 +158,7 @@ class App
 
     public function addExample(int $entryId, $exampleContent): int
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Example $exampleObject
          */
@@ -200,7 +170,7 @@ class App
 
     public function editExample(int $exampleId, string $exampleContent): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         /**
          * @var Example $exampleObject
          */
@@ -211,7 +181,7 @@ class App
 
     public function deleteExample(int $exampleId): void
     {
-        $this->checkLogin();
+        $this->users->checkLogin();
         $exampleObject = $this->titles->entries->examples->read($exampleId);
         $this->titles->entries->examples->remove($exampleObject);
     }

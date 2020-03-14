@@ -8,7 +8,7 @@ $router->get('titles/', function () use ($app) {
 });
 
 $router->get('titles/{id}', function ($id) use ($app) {
-    $isLogged = $app->getIsLogged();
+    $isLogged = $app->users->isLogged();
     $title = $app->getTitle((int) $id);
     require_once '../src/View/titles/view.php';
 });

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace midorikocak\dictionary;
 
+use function htmlspecialchars;
+
 class Example implements ArrayableInterface
 {
     private ?int $id;
@@ -50,7 +52,7 @@ class Example implements ArrayableInterface
     public function toArray(): array
     {
         $toReturn = [
-            'content' => $this->content,
+            'content' => htmlspecialchars($this->content),
         ];
 
         if ($this->id) {
