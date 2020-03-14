@@ -22,8 +22,16 @@ class Title implements ArrayableInterface
 
     public function addEntry(Entry $entry): void
     {
-        $entry->setTitleId = $this->id;
+        $entry->setTitleId($this->id);
         $this->entries [] = $entry;
+    }
+
+    /**
+     * @return Entry[]
+     */
+    public function getEntries(): array
+    {
+        return $this->entries;
     }
 
     public function getId(): ?int

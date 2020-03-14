@@ -56,8 +56,20 @@ CREATE TABLE entries (
     modified TIMESTAMP,
     UNIQUE (title)
 );";
+
+        $sql3 = "
+CREATE TABLE examples (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id INTEGER,
+    content TEXT,
+    created TIMESTAMP,
+    modified TIMESTAMP
+);
+";
+
         $this->db->query($sql)->execute();
         $this->db->query($sql2)->execute();
+        $this->db->query($sql3)->execute();
     }
 
     public function testDatabaseCreated(): void
@@ -123,6 +135,20 @@ CREATE TABLE entries (
         $this->app->getTitle($id);
     }
 
+    public function testSearchTitle(): void
+    {
+        $this->app->addTitle('Nesne yönelimli programlama');
+        $id = $this->db->lastInsertId();
+        $this->app->addEntry((int) $id, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addTitle('yazılımı');
+        $id = $this->db->lastInsertId();
+        $this->app->addEntry((int) $id, 'nesneli yazılım');
+
+        $titleData = $this->app->search('Nesne');
+
+        $this->assertNotEmpty($titleData);
+    }
+
     public function testGetEntries(): void
     {
         $this->app->addTitle('Nesne yönelimli programlama');
@@ -147,20 +173,6 @@ CREATE TABLE entries (
         $entryId = $this->db->lastInsertId();
         $entryData = $this->app->getEntry((int) $entryId);
         $this->assertEquals('Cogito Ergo sum', $entryData['content']);
-    }
-
-    public function testSearchTitle(): void
-    {
-        $this->app->addTitle('Nesne yönelimli programlama');
-        $id = $this->db->lastInsertId();
-        $this->app->addEntry((int) $id, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
-        $this->app->addTitle('yazılımı');
-        $id = $this->db->lastInsertId();
-        $this->app->addEntry((int) $id, 'nesneli yazılım');
-
-        $titleData = $this->app->search('Nesne');
-
-        $this->assertNotEmpty($titleData);
     }
 
     public function testEditEntry(): void
@@ -188,5 +200,81 @@ CREATE TABLE entries (
         $this->app->deleteEntry((int) $entryId);
         $this->expectException('Exception');
         $this->app->getEntry((int) $entryId);
+    }
+
+    public function testGetExamples(): void
+    {
+        $this->app->addTitle('Nesne yönelimli programlama');
+        $titleId = $this->db->lastInsertId();
+
+        $this->app->addEntry((int) $titleId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addEntry((int) $titleId, 'Her başka nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+
+        $entryId = $this->db->lastInsertId();
+
+        $this->app->addExample((int) $entryId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addExample((int) $entryId, 'Cogito Ergo sum');
+
+        $entries = $this->app->getExamples();
+
+        $this->assertCount(2, $entries);
+    }
+
+    public function testGetExample(): void
+    {
+        $this->app->addTitle('Nesne yönelimli programlama');
+        $titleId = $this->db->lastInsertId();
+
+        $this->app->addEntry((int) $titleId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addEntry((int) $titleId, 'Her başka nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+
+        $entryId = $this->db->lastInsertId();
+
+        $this->app->addExample((int) $entryId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addExample((int) $entryId, 'Cogito Ergo sum');
+
+        $exampleId = $this->db->lastInsertId();
+        $exampleData = $this->app->getExample((int) $exampleId);
+        $this->assertEquals('Cogito Ergo sum', $exampleData['content']);
+    }
+
+    public function testEditExample(): void
+    {
+        $this->app->addTitle('Nesne yönelimli programlama');
+        $titleId = $this->db->lastInsertId();
+
+        $this->app->addEntry((int) $titleId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addEntry((int) $titleId, 'Her başka nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+
+        $entryId = $this->db->lastInsertId();
+
+        $this->app->addExample((int) $entryId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addExample((int) $entryId, 'Cogito Ergo sum');
+
+        $exampleId = $this->db->lastInsertId();
+
+        $this->app->editExample((int) $exampleId, 'Edited Example');
+        $exampleData = $this->app->getExample((int) $exampleId);
+        $this->assertEquals('Edited Example', $exampleData['content']);
+    }
+
+    public function testdeleteExample(): void
+    {
+        $this->app->addTitle('Nesne yönelimli programlama');
+        $titleId = $this->db->lastInsertId();
+
+        $this->app->addEntry((int) $titleId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addEntry((int) $titleId, 'Her başka nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+
+        $entryId = $this->db->lastInsertId();
+
+        $this->app->addExample((int) $entryId, 'Her işlevin nesneler olarak soyutlandığı bir programlama yaklaşımı.');
+        $this->app->addExample((int) $entryId, 'Cogito Ergo sum');
+
+        $exampleId = $this->db->lastInsertId();
+
+        $this->app->deleteExample((int) $exampleId);
+        $this->expectException('Exception');
+        $this->app->getExample((int) $exampleId);
     }
 }

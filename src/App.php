@@ -18,31 +18,42 @@ class App
     private PDO $db;
     public Titles $titles;
 
-    private bool $isLogged;
-
     public function __construct(PDO $db)
     {
         $this->db = $db;
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
         $this->titles = new Titles($db);
-        $this->isLogged = false;
+        session_start();
     }
 
-    public function login($username, $password)
+    public function login($username, $password): bool
     {
-        session_start();
         if ($username === 'midori' && $password === 'midoripass') {
-            $_SESSION['user'] = 'midori';
-            $this->isLogged = true;
+            $_SESSION['user'] = $username;
+            return true;
+        }
+
+        return false;
+    }
+
+    public function logout(): void
+    {
+        session_destroy();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function checkLogin(): void
+    {
+        if (!$this->getIsLogged()) {
+            throw new Exception('Unauthorized');
         }
     }
 
-    public function logout()
+    public function getIsLogged(): bool
     {
-        unset($_SESSION['user']);
-        $this->isLogged = false;
-        session_destroy();
+        return ($_SESSION['user'] ?? '') === 'midori';
     }
 
     public function getTitles(int $page = 0, int $limit = 10, int $offset = 0): array
@@ -57,18 +68,6 @@ class App
     public function getTitle($titleId): array
     {
         return $this->titles->read((string) $titleId)->toArray() ?? [];
-    }
-
-    public function checkLogin()
-    {
-        if (!$this->isLogged) {
-            throw new Exception('Unauthorized');
-        }
-    }
-
-    public function getIsLogged(): bool
-    {
-        return $this->isLogged;
     }
 
     public function addTitle(string $title): int
@@ -102,6 +101,33 @@ class App
         $this->titles->remove($titleObject);
     }
 
+    public function search(string $keyword, $page = 0, $limit = 10, $offset = 0): array
+    {
+        if ($keyword === '') {
+            return $this->getTitles($page, $limit, $offset);
+        }
+
+        $titles = $this->titles->search(strtolower($keyword), $page, $limit, $offset);
+        $entries = $this->titles->entries->search(strtolower($keyword), $page, $limit, $offset);
+        $examples = $this->titles->entries->examples->search(strtolower($keyword), $page, $limit, $offset);
+
+        $entryIds = array_map(fn($example) => $example->getEntryId(), $examples);
+
+        array_walk($entryIds, function ($id) use (&$entries) {
+            if (!isset($entries[$id])) {
+                $entries[$id] = $this->titles->entries->read($id);
+            }
+        });
+
+        $titleIds = array_map(fn($entry) => $entry->getTitleId(), $entries);
+        array_walk($titleIds, function ($id) use (&$titles) {
+            if (!isset($titles[$id])) {
+                $titles[$id] = $this->titles->read($id);
+            }
+        });
+        return array_map(fn($title) => $title->toArray(), $titles);
+    }
+
     public function getEntries(int $page = 0, int $limit = 10, int $offset = 0): array
     {
         $entries = $this->titles->entries->readAll($page, $limit, $offset);
@@ -128,22 +154,6 @@ class App
         return (int) $this->db->lastInsertId();
     }
 
-    public function search(string $keyword, $page = 0, $limit = 10, $offset = 0): array
-    {
-        if ($keyword === '') {
-            return $this->getTitles($page, $limit, $offset);
-        }
-        $titles = $this->titles->search(strtolower($keyword), $page, $limit, $offset);
-        $entries = $this->titles->entries->search(strtolower($keyword), $page, $limit, $offset);
-        $titleIds = array_map(fn($entry) => $entry->getTitleId(), $entries);
-        array_walk($titleIds, function ($id) use (&$titles) {
-            if (!isset($titles[$id])) {
-                $titles[$id] = $this->titles->read($id);
-            }
-        });
-        return array_map(fn($title) => $title->toArray(), $titles);
-    }
-
     public function editEntry(int $entryId, string $entryContent): void
     {
         $this->checkLogin();
@@ -160,5 +170,49 @@ class App
         $this->checkLogin();
         $entryObject = $this->titles->entries->read($entryId);
         $this->titles->entries->remove($entryObject);
+    }
+
+    public function getExamples(int $page = 0, int $limit = 10, int $offset = 0): array
+    {
+        $examples = $this->titles->entries->examples->readAll($page, $limit, $offset);
+        /**
+         * @var Example $example
+         */
+        return array_map(fn($example) => $example->toArray(), $examples);
+    }
+
+    public function getExample(int $exampleId): array
+    {
+        return $this->titles->entries->examples->read($exampleId)->toArray();
+    }
+
+    public function addExample(int $entryId, $exampleContent): int
+    {
+        $this->checkLogin();
+        /**
+         * @var Example $exampleObject
+         */
+        $exampleObject = new Example($exampleContent);
+        $exampleObject->setEntryId($entryId);
+        $this->titles->entries->examples->save($exampleObject);
+        return (int) $this->db->lastInsertId();
+    }
+
+    public function editExample(int $exampleId, string $exampleContent): void
+    {
+        $this->checkLogin();
+        /**
+         * @var Example $exampleObject
+         */
+        $exampleObject = $this->titles->entries->examples->read($exampleId);
+        $exampleObject->setContent($exampleContent);
+        $this->titles->entries->examples->save($exampleObject);
+    }
+
+    public function deleteExample(int $exampleId): void
+    {
+        $this->checkLogin();
+        $exampleObject = $this->titles->entries->examples->read($exampleId);
+        $this->titles->entries->examples->remove($exampleObject);
     }
 }

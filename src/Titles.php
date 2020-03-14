@@ -35,7 +35,7 @@ class Titles
         foreach ($results as $titleData) {
             $title = new Title($titleData['title'], (int) $titleData['id']);
             $entries = $this->entries->readEntriesByTitleId((int) $titleData['id']);
-            array_walk($entries, function ($entry) use ($title) {
+            array_walk($entries, function ($entry) use (&$title) {
                 $title->addEntry($entry);
             });
             $titles [] = $title;
@@ -58,7 +58,7 @@ class Titles
         foreach ($results as $titleData) {
             $title = new Title($titleData['title'], (int) $titleData['id']);
             $entries = $this->entries->readEntriesByTitleId((int) $titleData['id']);
-            array_walk($entries, function ($entry) use ($title) {
+            array_walk($entries, function ($entry) use (&$title) {
                 $title->addEntry($entry);
             });
             $titles [] = $title;
@@ -84,7 +84,7 @@ class Titles
         foreach ($results as $titleData) {
             $title = new Title($titleData['title'], (int) $titleData['id']);
             $entries = $this->entries->readEntriesByTitleId((int) $title->getId());
-            array_walk($entries, function ($entry) use ($title) {
+            array_walk($entries, function ($entry) use (&$title) {
                 $title->addEntry($entry);
             });
             $titles[$titleData['id']] = $title;
