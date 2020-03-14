@@ -13,7 +13,6 @@ $router->get('titles/{id}', function ($id) use ($app) {
     require_once '../src/View/titles/view.php';
 });
 
-
 $router->get('titles/{id}/edit', function ($id) use ($app) {
     $title = $app->getTitle((int) $id);
     require_once '../src/View/titles/edit.php';

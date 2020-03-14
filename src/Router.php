@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace midorikocak\dictionary;
 
+use function array_reverse;
 use function array_values;
 use function count;
 use function explode;

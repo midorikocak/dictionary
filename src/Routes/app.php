@@ -34,7 +34,6 @@ $router->post('search', function () use ($app) {
     require_once '../src/View/titles/index.php';
 });
 
-
 $router->get('/addTitle', function () {
     require_once '../src/View/titles/add.php';
 });
