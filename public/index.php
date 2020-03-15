@@ -13,12 +13,20 @@ use function trim;
 use const PHP_URL_PATH;
 
 require '../vendor/autoload.php';
+
+require_once '../config.php';
+
 require '../src/View/layout/header.php';
 
 $url = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
 $db = new PDO('sqlite:../data/database.db');
 
 $app = new App($db);
+
+if(!$app->isInstalled()){
+    $app->resetDatabase();
+    $app->createTables();
+}
 
 $router = new Router();
 

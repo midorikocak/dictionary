@@ -17,7 +17,7 @@
 
 <body>
 <header>
-    <h1>Dictionary</h1>
+    <h1><?=$dictionaryName?></h1>
     <form class="search" action="/search" method="post">
         <input placeholder="Search" type="text" name="keyword" id="keyword"><button>Send</button>
     </form>

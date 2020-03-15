@@ -8,6 +8,8 @@ use PDO;
 
 use function array_map;
 use function array_walk;
+use function in_array;
+use function password_hash;
 use function session_start;
 use function strtolower;
 
@@ -24,6 +26,88 @@ class App
         $this->titles = new Titles($db);
         $this->users = new Users($db);
         session_start();
+    }
+
+    public function isInstalled(): bool
+    {
+        $stmt = $this->db->query("SELECT name
+                                   FROM sqlite_master
+                                   WHERE type = 'table'
+                                   ORDER BY name");
+        $tables = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $tables[] = $row['name'];
+        }
+
+        foreach (['users', 'titles', 'entries', 'examples'] as $tableName) {
+            if (!in_array($tableName, $tables, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function resetDatabase(): void
+    {
+        $sql = "DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS entries;
+DROP TABLE IF EXISTS examples;
+DROP TABLE IF EXISTS titles;";
+        $this->db->exec($sql);
+    }
+
+    public function createTables(): void
+    {
+        $createUsers = "CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created DATETIME,
+    modified DATETIME,
+    UNIQUE (email, username)
+);
+";
+        $createEntries = "
+CREATE TABLE entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id INTEGER,
+    content TEXT,
+    created TIMESTAMP,
+    modified TIMESTAMP
+);
+";
+        $createTitles = "
+CREATE TABLE titles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(255) NOT NULL,
+    created TIMESTAMP,
+    modified TIMESTAMP,
+    UNIQUE (title)
+);
+";
+        $createExamples = "
+CREATE TABLE examples (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id INTEGER,
+    content TEXT,
+    created TIMESTAMP,
+    modified TIMESTAMP
+);
+";
+
+        $passwordHash = password_hash('password', PASSWORD_DEFAULT);
+        $insertUsers = "
+INSERT INTO users (username, email, password, created, modified)
+VALUES
+('admin', 'admin@example.com', '$passwordHash', DATE(), DATE());";
+
+        $this->db->exec($createUsers);
+        $this->db->exec($createTitles);
+        $this->db->exec($createEntries);
+        $this->db->exec($createExamples);
+        $this->db->exec($insertUsers);
     }
 
     public function getTitles(int $page = 0, int $limit = 10, int $offset = 0): array

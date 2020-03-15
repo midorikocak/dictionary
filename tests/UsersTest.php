@@ -15,7 +15,7 @@ use const PHP_SESSION_ACTIVE;
 
 class UsersTest extends TestCase
 {
-    private PDO $db;
+    private ?PDO $db;
     private Users $users;
 
     public function setUp(): void
@@ -33,6 +33,7 @@ class UsersTest extends TestCase
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();
         }
+        $this->db = null;
     }
 
     private function createTables(): void

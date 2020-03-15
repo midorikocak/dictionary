@@ -76,7 +76,7 @@ class Users
     {
         $user = $this->getUserByEmail($email);
 
-        if (password_verify($password, $user['password'])) {
+        if (password_verify($password, $user['password'] ?? '')) {
             $_SESSION['user'] = $user['username'];
             return true;
         }

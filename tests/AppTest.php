@@ -7,6 +7,7 @@ namespace midorikocak\dictionary;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
+use function password_hash;
 use function reset;
 use function session_destroy;
 use function session_status;
@@ -16,7 +17,7 @@ use const PHP_SESSION_ACTIVE;
 
 class AppTest extends TestCase
 {
-    private PDO $db;
+    private ?PDO $db;
     private App $app;
 
     public function setUp(): void
@@ -26,21 +27,24 @@ class AppTest extends TestCase
         $this->createTables();
 
         $this->app = new App($this->db);
+
         $this->app->users->register('midori', 'email@example.com', 'midoripass');
         $this->app->users->login('email@example.com', 'midoripass');
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
-    }
-
     private function createTables(): void
     {
-        $sql = "
+        $createUsers = "CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created DATETIME,
+    modified DATETIME,
+    UNIQUE (email, username)
+);
+";
+        $createEntries = "
 CREATE TABLE entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title_id INTEGER,
@@ -49,16 +53,16 @@ CREATE TABLE entries (
     modified TIMESTAMP
 );
 ";
-
-        $sql2 = "CREATE TABLE titles (
+        $createTitles = "
+CREATE TABLE titles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title VARCHAR(255) NOT NULL,
     created TIMESTAMP,
     modified TIMESTAMP,
     UNIQUE (title)
-);";
-
-        $sql3 = "
+);
+";
+        $createExamples = "
 CREATE TABLE examples (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     entry_id INTEGER,
@@ -67,21 +71,33 @@ CREATE TABLE examples (
     modified TIMESTAMP
 );
 ";
-
-        $sql4 = "
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    UNIQUE (email, username)
-);
+        $passwordHash = password_hash('password', PASSWORD_DEFAULT);
+        $insertUsers = "
+INSERT INTO users (username, email, password, created, modified)
+VALUES
+('admin', 'admin@example.com', '$passwordHash', DATE(), DATE());
 ";
 
-        $this->db->query($sql)->execute();
-        $this->db->query($sql2)->execute();
-        $this->db->query($sql3)->execute();
-        $this->db->query($sql4)->execute();
+        $this->db->exec($createUsers);
+        $this->db->exec($createTitles);
+        $this->db->exec($createEntries);
+        $this->db->exec($createExamples);
+        $this->db->exec($insertUsers);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+
+        $drop = "DROP TABLE users";
+        $this->db->exec($drop);
+
+        $this->db = null;
+
+        unset($this->db);
     }
 
     public function testDatabaseCreated(): void
@@ -94,7 +110,6 @@ CREATE TABLE users (
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $tables[] = $row['name'];
         }
-
         $this->assertNotEmpty($tables);
     }
 
