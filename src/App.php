@@ -13,6 +13,8 @@ use function password_hash;
 use function session_start;
 use function strtolower;
 
+use const PASSWORD_DEFAULT;
+
 class App
 {
     private PDO $db;
@@ -153,6 +155,11 @@ VALUES
          */
         $titleObject = $this->titles->read($titleId);
         $this->titles->remove($titleObject);
+    }
+
+    public function isLogged(): bool
+    {
+        return $this->users->isLogged();
     }
 
     public function search(string $keyword, $page = 0, $limit = 10, $offset = 0): array

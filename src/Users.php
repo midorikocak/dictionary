@@ -13,6 +13,7 @@ use function password_verify;
 use function strlen;
 
 use const FILTER_VALIDATE_EMAIL;
+use const PASSWORD_DEFAULT;
 
 class Users
 {

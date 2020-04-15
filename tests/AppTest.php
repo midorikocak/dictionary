@@ -13,6 +13,7 @@ use function session_destroy;
 use function session_status;
 use function strpos;
 
+use const PASSWORD_DEFAULT;
 use const PHP_SESSION_ACTIVE;
 
 class AppTest extends TestCase
